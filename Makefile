@@ -1,3 +1,6 @@
+#source: https://siliconwit.com/education/embedded-programming-atmega328p/avr-toolchain-bare-metal-setup/#project-structure
+
+
 MCU ?= atmega328p
 AVRDUDE_MCU ?= m328p
 F_CPU ?= 16000000UL
