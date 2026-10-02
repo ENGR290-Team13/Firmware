@@ -54,9 +54,10 @@ void gpio_init() {
 
 
 void uart_tx_init() {
+  UCSR0A = 0; // Normal speed; the bootloader may leave U2X0 enabled.
   UBRR0H = (uint8_t)((UBRR)>>8); // Set the UART speed as defined by UBRR
   UBRR0L = (uint8_t)UBRR;
-  UCSR0B|=(1<<TXCIE0)|(1<<TXEN0); //(1<<UDRIE0) Enable TX and TX IRQ.
+  UCSR0B=(1<<TXEN0); // Polling TX; ADC and timer interrupts remain available.
   UCSR0C=(3<<UCSZ00); // Asynchronous UART, 8-N-1
 }// end UART init
 

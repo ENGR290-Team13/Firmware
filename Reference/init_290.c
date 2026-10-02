@@ -53,12 +53,12 @@ void gpio_init() {
 } //end gpio_init
 
 
-void uart_tx_init() {
-  UBRR0H = (uint8_t)((UBRR)>>8); // Set the UART speed as defined by UBRR
-  UBRR0L = (uint8_t)UBRR;
-  UCSR0B|=(1<<TXCIE0)|(1<<TXEN0); //(1<<UDRIE0) Enable TX and TX IRQ.
-  UCSR0C=(3<<UCSZ00); // Asynchronous UART, 8-N-1
-}// end UART init
+// void uart_tx_init() {
+//   UBRR0H = (uint8_t)((UBRR)>>8); // Set the UART speed as defined by UBRR
+//   UBRR0L = (uint8_t)UBRR;
+//   UCSR0B|=(1<<TXCIE0)|(1<<TXEN0); //(1<<UDRIE0) Enable TX and TX IRQ.
+//   // UCSR0C=(3<<UCSZ00); // Asynchronous UART, 8-N-1
+// }// end UART init
 
 void uart_init() { // TX and RX init with IRQ
   UBRR0H = (uint8_t)((UBRR)>>8); // Set the UART speed as defined by UBRR

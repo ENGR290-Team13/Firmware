@@ -103,7 +103,7 @@ The project can be developed from **Git Bash / MINGW64** instead of requiring th
 Open Git Bash and temporarily add the UCRT64 binaries to the PATH:
 
 ```bash
-export PATH="$PATH:/c/msys64/ucrt64/bin"
+export PATH="/c/msys64/ucrt64/bin:/c/msys64/usr/bin:$PATH"
 ```
 
 Verify that Git Bash can now find the AVR tools:
@@ -144,7 +144,7 @@ nano ~/.bashrc
 Add the following lines:
 
 ```bash
-export PATH="$PATH:/c/msys64/ucrt64/bin"
+export PATH="/c/msys64/ucrt64/bin:/c/msys64/usr/bin:$PATH"
 alias make='mingw32-make'
 ```
 
@@ -249,13 +249,39 @@ make flash PORT=COM4
 
 Replace `COM4` with the correct port.
 
-If the Nano uses the older bootloader and uploading at 115200 baud fails, try:
+The Makefile defaults to the older Nano bootloader (57600). For a Nano with the newer bootloader, use:
 
 ```bash
-make flash PORT=COM4 UPLOAD_BAUD=57600
+make flash PORT=COM4 UPLOAD_BAUD=115200
 ```
 
 The upload baud rate is separate from the UART baud rate used by the running firmware.
+
+### 9. Monitor the running firmware in Arduino IDE
+
+Close Serial Monitor before running `make flash`. After uploading, select the
+same port in Arduino IDE under **Tools > Port**, open **Tools > Serial Monitor**,
+and select **9600 baud**. The IDE can monitor this bare-metal C firmware; no
+Arduino sketch upload is needed. Opening the monitor may reset the Nano.
+
+The active firmware is the ultrasonic assignment in `src/main.c`, the single
+entry point compiled by the Makefile. The separate ultrasonic `NOTmain.c` has
+been consolidated into it. Files under `Reference/` are examples, not compiled.
+
+Connect the ultrasonic trigger to **D11 (PB3)** and echo to **D2 (PD2)**,
+with the sensor powered from 5 V and sharing ground with the Nano. The distance
+LED uses PWM on **D3 (PD3)**; the built-in **D13 (PB5)** LED flashes when the
+distance is at or outside the 16–49 cm range.
+
+The monitor prints a startup message and readings such as `Distance: 25.4 cm`.
+A missing echo prints `Distance: no echo (timeout)` instead of hanging.
+Measurements have a minimum 60 ms gap; the threshold LED blink adds 1.5 seconds
+at distances at or outside the range. This firmware uses pulse echo, not ADC.
+
+If AVR-GCC exits with `Error 1` and no compiler diagnostics, put the MSYS2
+directories **first** in `PATH`, as shown above. Appending them can load DLLs
+from another GCC installation. The Makefile also prioritizes MSYS2 when it is
+installed under `C:/msys64`; override `MSYS2_BIN` for a different UCRT64 location.
 
 <!-- ================== AI-GENERATED END ======================== -->
 
@@ -286,7 +312,7 @@ The Makefile is configured for a classic Nano (ATmega328P at 16 MHz). Run the fo
 make
 ```
 
-`make` runs the default `all` target: it invokes AVR-GCC to compile and link all `src/*.c` files into `build/firmware.elf`, converts that executable to the uploadable Intel HEX file `build/firmware.hex`, and reports the program size. The Makefile supplies `-mmcu=atmega328p`, `-DF_CPU=16000000UL`, size optimization, compiler warnings, and the `include/` header search path.
+`make` runs the default `all` target: it invokes AVR-GCC to compile and link `src/main.c` and `src/init_290.c` into `build/firmware.elf`, converts that executable to the uploadable Intel HEX file `build/firmware.hex`, and reports the program size. The Makefile supplies `-mmcu=atmega328p`, `-DF_CPU=16000000UL`, size optimization, compiler warnings, and the `include/` header search path.
 
 Other common commands:
 
@@ -297,7 +323,8 @@ make MCU=atmega328p F_CPU=16000000UL
 
 `make clean` removes generated files under `build/`; the next `make` rebuilds them. The MCU and clock options show how to override the defaults if the board changes. Build output is ignored by Git and should not be committed.
 
-**Current repository status:** this is build infrastructure, not yet a complete firmware application. The source files are empty, so `make` will currently stop at the link step because there is no `main()` function. That is expected until firmware implementation begins. A valid HEX file is required before the board can be programmed.
+The firmware includes one `main()`, ultrasonic pulse timing, distance LED
+control, and serial output. A successful build creates the HEX file for uploading.
 
 6. Upload generated HEX through bootloader
 
@@ -310,7 +337,7 @@ make flash PORT=COM4
 For an older Nano bootloader that uses 57600 baud, use:
 
 ```sh
-make flash PORT=COM4 BAUD=57600
+make flash PORT=COM4 UPLOAD_BAUD=57600
 ```
 
 On Linux, use the device path instead, such as `make flash PORT=/dev/ttyUSB0`. `make flash` first builds the HEX file and then sends it over the USB serial connection using the Nano's bootloader. It cannot succeed until there is firmware code that builds into a HEX file. A GitHub Codespace can build the file, but usually cannot access a Nano physically connected to your local computer; download the HEX and run the upload command locally in that case.
