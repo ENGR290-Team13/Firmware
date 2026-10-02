@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "AVR",
+            "includePath": [
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src",
+                "C:/msys64/ucrt64/avr/include"
+            ],
+            "defines": [
+                "F_CPU=16000000UL"
+            ],
+            "compilerPath": "C:/msys64/ucrt64/bin/avr-gcc.exe",
+            "compilerArgs": [
+                "-mmcu=atmega328p"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64"
+        }
+    ],
+    "version": 4
+}
