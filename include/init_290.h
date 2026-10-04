@@ -4,7 +4,6 @@
 #define PWM_TOP 2500
 
 void gpio_init();
-void uart_tx_init();
 void uart_init();
 void timer1_50Hz_init (uint8_t en_IRQ);
 void timer0_init ();
