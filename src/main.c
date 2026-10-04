@@ -3,6 +3,7 @@
  * Sensor supply: 5 V with common ground (3.09 V is only the ADC reference).
  * PWM LED: D3 (PD3); threshold LED: D13 (PB5).
  * Serial Monitor: 9600 baud, 8-N-1.
+ * All Files with original source code is defined all code was Provided in complementary files in ENGR 290's moodle page
  */
 #ifndef F_CPU
 #define F_CPU 16000000UL
@@ -29,8 +30,6 @@
 
 static volatile uint8_t RX_buff, servo_idx, ADC_sample, V_batt;
 static volatile uint16_t time, delay_ms, ADC_acc;
-
-   
 
 static volatile struct
 {
@@ -90,19 +89,19 @@ void send_reading(int16_t value, char label[], uint8_t crlf)
 void adc_init(uint8_t channel, uint8_t en_IRQ)
 {
     // ADC init
-    ADMUX = ((1 << ADLAR) | (channel & 0x0F) | (1<<REFS0)); // "left-aligned" result for easy 8-bit reading.
-                                               // AVcc as Aref |(1<<REFS0)
-                                               // Sets ADC to the specified channel. Can be changed later.
+    ADMUX = ((1 << ADLAR) | (channel & 0x0F) | (1 << REFS0)); // "left-aligned" result for easy 8-bit reading.
+                                                              // AVcc as Aref |(1<<REFS0)
+                                                              // Sets ADC to the specified channel. Can be changed later.
     ADCSRA = (1 << ADEN);
     if (en_IRQ)
-    ADCSRA |= (1 << ADIE);                            // enable ADC Complete Interrupt. NOTE: the ISR MUST be defined!!!
+        ADCSRA |= (1 << ADIE);                            // enable ADC Complete Interrupt. NOTE: the ISR MUST be defined!!!
     ADCSRA |= (1 << ADPS0) | (1 << ADPS1) | (1 << ADPS2); // ADC clock prescaler
     ADCSRA |= (1 << ADATE);                               // Continuosly running mode
     ADCSRA |= (1 << ADSC);                                // Start ADC
 }
 
 ISR(ADC_vect)
-{   // the ADC runs on interrupt and populates ADC_data structure.
+{ // the ADC runs on interrupt and populates ADC_data structure.
     // You can use the ADC readings in the structure.
     //  PORTB^=(1<<PB3); // to check ISR timing
     if (ADC_sample == 0)
@@ -174,9 +173,8 @@ ISR(ADC_vect)
 void pin_init()
 {
 
-    
-    DDRD |= (1 << PD3);  // D3's light
-    DDRB |= (1 << PB5);  // L pulse light
+    DDRB |= (1 << PB3); // D3's light set as an ouput
+    DDRB |= (1 << PB5); // L pulse light
 
     PORTB &= ~(1 << PB5); // set L initally OFF
 }
@@ -187,7 +185,7 @@ void timer2_init()
     TCCR2A = _BV(COM2A1) | _BV(COM2B1) | _BV(WGM21) | _BV(WGM20);
     TCCR2B = _BV(CS22);
 
-    OCR2B = 0; // initally set this to 0
+    OCR2A = 0; // initally set this to 0
 }
 
 void flashing_L()
@@ -213,25 +211,25 @@ int main(void)
     {
         send_reading(ADC_data.ADC6, "ADC: ", 1);
 
-        float Vout = ADC_data.ADC6 * (3.09)/ 256 ;// for 8 bit
+        float Vout = ADC_data.ADC6 * (3.09) / 256; // for 8 bit we use 256
 
-        float distance =  29.988 * pow(Vout, -1.173); //given formula for distance for sharp part number
+        float distance = 29.988 * pow(Vout, -1.173); // Found equation for distance using the output Voltage calculated from our ADC output
 
-        send_reading(distance, "Distance: ",1);
-        
+        send_reading(distance, "Distance: ", 1);
+
         if (distance <= 16)
         {
-            OCR2B = 255;
+            OCR2A = 255;
             flashing_L();
         }
         else if (distance >= 49)
         {
-            OCR2B = 0;
+            OCR2A = 0;
             flashing_L();
         }
         else
         {
-            OCR2B = (uint8_t)(255.0f * (49.0f - distance) / 33.0f);
+            OCR2A = (uint8_t)(255.0f * (49.0f - distance) / 33.0f); // the 33 represents D2 - d1 equations used using a graphing calculator for the logic
         }
     }
 }
