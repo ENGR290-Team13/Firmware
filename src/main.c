@@ -42,12 +42,7 @@ static volatile uint8_t *msg, TX_buffer1[20], TX_buffer2[20];
 volatile struct
 {
     uint8_t TX_finished : 1;
-    uint8_t sample : 1;
-    uint8_t mode : 1;
-    uint8_t stop : 1;
-    //  uint8_t ADC_ready:1;
-    uint8_t T1_ovf0 : 2;
-    uint8_t T1_ovf1 : 2;
+
 } flags;
 
 ISR(USART_TX_vect)
@@ -208,7 +203,7 @@ int main(void)
 
         float Vout = ADC_data.ADC6 * (3.09) / 256; // for 8 bit we use 256
 
-        float distance = 29.988 * pow(Vout, -1.173); // Found equation for distance using the output Voltage calculated from our ADC output
+        float distance = 29.988 * pow(Vout, -1.173); // Found Equation from following ReadME file https://github.com/guillaume-rico/SharpIR
 
         send_reading(distance, "Distance: ", 1);
 
