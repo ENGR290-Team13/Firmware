@@ -1,6 +1,7 @@
 /* Ultrasonic assignment: ATmega328P / Nano, 16 MHz.
  * Trigger: D11 (PB3), echo: D2 (PD2), PWM LED: (PB3).
  * Arduino IDE Serial Monitor: 9600 baud, 8-N-1.
+ * Any source code not developped by us was taken from ENGR 290's moodle page as sample code to be used
  */
 #ifndef F_CPU
 #define F_CPU 16000000UL
