@@ -16,13 +16,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include "init_290.h"
-
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include <stdlib.h>
 #include <string.h>
 #include <util/delay.h>
-#include "init_290.h"
 
 #define BAUD 9600UL
 #define UBRR ((F_CPU) / ((BAUD) * (16UL)) - 1)
