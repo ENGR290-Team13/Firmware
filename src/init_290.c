@@ -92,7 +92,7 @@ void timer0_init () {
   TCCR0B|=((1<<CS01)|(1<<CS00)); 
 }
 
-
+/*
 void adc_init (uint8_t channel, uint8_t en_IRQ) {
 // ADC init
   ADMUX=((1<<ADLAR)|(channel&0x0F)); // "left-aligned" result for easy 8-bit reading. 
@@ -104,6 +104,7 @@ void adc_init (uint8_t channel, uint8_t en_IRQ) {
   ADCSRA|=(1<<ADATE); // Continuosly running mode
   ADCSRA|=(1<<ADSC); // Start ADC
 }
+*/
 
 void twi_init(){
 // TWI init

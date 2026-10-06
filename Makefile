@@ -18,7 +18,9 @@ TARGET := $(BUILD_DIR)/firmware
 ELF := $(TARGET).elf
 HEX := $(TARGET).hex
 
-SOURCES := $(wildcard src/*.c)
+# One entry point: the ultrasonic assignment in src/main.c.
+# Reference/ and archived assignment files are not firmware sources.
+SOURCES := src/main.c
 HEADERS := $(wildcard include/*.h)
 
 CFLAGS := -mmcu=$(MCU) \
