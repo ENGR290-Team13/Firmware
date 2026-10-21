@@ -1,52 +1,28 @@
-#source: https://siliconwit.com/education/embedded-programming-atmega328p/avr-toolchain-bare-metal-setup/#project-structure
-
-
 MCU ?= atmega328p
-AVRDUDE_MCU ?= m328p
 F_CPU ?= 16000000UL
-
-UPLOAD_BAUD ?= 115200
-PORT ?=
-
-AVR_CC ?= avr-gcc
-AVR_OBJCOPY ?= avr-objcopy
-AVR_SIZE ?= avr-size
-AVRDUDE ?= avrdude
-
-BUILD_DIR := build
-TARGET := $(BUILD_DIR)/firmware
-ELF := $(TARGET).elf
-HEX := $(TARGET).hex
-
-# One entry point: the ultrasonic assignment in src/main.c.
-# Reference/ and archived assignment files are not firmware sources.
-SOURCES := src/main.c
+PORT ?= COM9
+UPLOAD_BAUD ?= 57600
+SOURCES := src/main.c src/mpu6050.c src/TWI_290.c
 HEADERS := $(wildcard include/*.h)
-
-CFLAGS := -mmcu=$(MCU) \
-          -DF_CPU=$(F_CPU) \
-          -Os \
-          -Wall \
-          -Wextra \
-          -Iinclude
+CC := avr-gcc
+CFLAGS := -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Os -std=gnu11 -Wall -Wextra -Iinclude
 
 .PHONY: all clean flash
+all: build/firmware.hex
 
-all: $(HEX)
+build:
+	mkdir -p build
 
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+build/firmware.elf: $(SOURCES) $(HEADERS) | build
+	$(CC) $(CFLAGS) $(SOURCES) -o $@ -lm
 
-$(ELF): $(SOURCES) $(HEADERS) | $(BUILD_DIR)
-	$(AVR_CC) $(CFLAGS) $(SOURCES) -o $@
+build/firmware.hex: build/firmware.elf
+	avr-objcopy -O ihex -R .eeprom $< $@
+	avr-size --format=avr --mcu=$(MCU) build/firmware.elf
 
-$(HEX): $(ELF)
-	$(AVR_OBJCOPY) -O ihex -R .eeprom $< $@
-	$(AVR_SIZE) --format=avr --mcu=$(MCU) $(ELF)
-
-flash: $(HEX)
-	@if [ -z "$(PORT)" ]; then echo "Set PORT, for example: make flash PORT=COM4"; exit 2; fi
-	$(AVRDUDE) -p $(AVRDUDE_MCU) -c arduino -P "$(PORT)" -b $(UPLOAD_BAUD) -D -U flash:w:$(HEX):i
+flash: build/firmware.hex
+	@test -n "$(PORT)" || (echo "Usage: mingw32-make flash PORT=COM9"; exit 1)
+	avrdude -p m328p -c arduino -P "$(PORT)" -b $(UPLOAD_BAUD) -D -U flash:w:build/firmware.hex:i
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf build
