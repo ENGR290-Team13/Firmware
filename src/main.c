@@ -132,6 +132,9 @@ int main(void)
     uint16_t Servo_Response = 0.0f;
     uint8_t first = 1;
     uint8_t count = 0;
+    uint8_t count_IMU = 0;
+    float position = 0.0f;
+    float velocity = 0.0f;
     uart_text("Calibration done. Output every ~1.5 seconds.\r\n");
 
     while (1)
@@ -142,9 +145,9 @@ int main(void)
             _delay_ms(100);
             continue;
         }
-        float ax = (float)s.ax / 16384.0f;
-        float ay = (float)s.ay / 16384.0f;
-        float az = (float)s.az / 16384.0f;
+        float ax = (float)s.ax / 8192.0f;
+        float ay = (float)s.ay / 8192.0f;
+        float az = (float)s.az / 8192.0f;
         float gx = ((float)s.gx - bias_x) / 131.0f;
         float gy = ((float)s.gy - bias_y) / 131.0f;
         float gz = ((float)s.gz - bias_z) / 131.0f;
@@ -174,6 +177,29 @@ int main(void)
             uart_float(" Ay: ", ay);
             uart_float(" Az: ", az);
             uart_text(" g\r\n\r\n");
+        }
+
+        if (++count_IMU >= 50)
+        {
+            count_IMU = 0;
+
+            float dt = SAMPLE_PERIOD_S;
+            float acceleration = ax * 9.81f; // Preserve direction
+
+            if (fabsf(ax) > 0.13f)
+            {
+                position += velocity * dt + 0.5f * acceleration * dt * dt;
+
+                velocity += acceleration * dt;
+            }
+            else
+            {
+                // Treat small acceleration as stationary
+                velocity = 0.0f;
+            }
+
+            uart_float("X Position: ", position);
+            uart_text(" m\r\n");
         }
 
         if (yaw <= (-85.0f) || yaw >= 85.0f)
