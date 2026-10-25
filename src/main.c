@@ -184,9 +184,9 @@ int main(void)
             count_IMU = 0;
 
             float dt = SAMPLE_PERIOD_S;
-            float acceleration = ax * 9.81f; // Preserve direction
+            float acceleration = ax * 9.81f; 
 
-            if (fabsf(ax) > 0.13f)
+            if (fabsf(ax) > 0.03f)
             {
                 position += velocity * dt + 0.5f * acceleration * dt * dt;
 
@@ -194,7 +194,7 @@ int main(void)
             }
             else
             {
-                // Treat small acceleration as stationary
+                
                 velocity = 0.0f;
             }
 
